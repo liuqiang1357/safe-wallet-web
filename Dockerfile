@@ -1,13 +1,13 @@
 FROM node:18-alpine
 RUN apk add --no-cache libc6-compat git python3 py3-pip make g++ libusb-dev eudev-dev linux-headers
+RUN yarn global add node-gyp
+
 WORKDIR /app
+
+COPY package.json .
+COPY yarn.lock .
+RUN --mount=type=cache,target=/root/.yarn YARN_CACHE_FOLDER=/root/.yarn yarn --ignore-scripts --frozen-lockfile
 COPY . .
-
-# Fix arm64 timeouts
-RUN yarn config set network-timeout 300000 && yarn global add node-gyp
-
-# install deps
-RUN yarn install --frozen-lockfile
 RUN yarn after-install
 
 ENV NODE_ENV production
